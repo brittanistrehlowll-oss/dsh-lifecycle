@@ -1,0 +1,38 @@
+{
+  "name": "dsh-lifecycle",
+  "description": "Lifecycle controls for the DeepSeek Harness web surface: restart/stop buttons in the sidebar, a full-screen takeover overlay during restarts, and an independent launch page served by a local controller (127.0.0.1:3081) that keeps working after DSH stops.",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "lib/dsh-restart-button.mjs",
+  "exports": {
+    ".": "./lib/dsh-restart-button.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/dsh-restart-button.mjs",
+    "controller/dsh-controller.mjs",
+    "scripts/Start-DSH-Watchdog.ps1",
+    "scripts/Start-DSH-Web-Detached.ps1",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "lifecycle",
+    "restart",
+    "shutdown",
+    "launcher",
+    "watchdog"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brittanistrehlowll-oss/dsh-lifecycle.git"
+  }
+}

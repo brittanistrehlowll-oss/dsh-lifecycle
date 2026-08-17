@@ -1,0 +1,20 @@
+# dsh-lifecycle bundle patch: mounts the restart/stop button plugin into a
+# dsh profile. Adjust `name` to point at the plugin file after you copy it
+# into your profile's plugins directory, e.g.:
+#
+#   <dsh-root>/home/profiles/web/plugins/dsh-restart-button.mjs
+#
+# The watchdog script (scripts/Start-DSH-Watchdog.ps1) and the controller
+# (controller/dsh-controller.mjs) are external processes; copy them next to
+# each other at <dsh-root>/ as well.
+
+- insert:
+    - id: restart-button
+      name: './plugins/dsh-restart-button.mjs'
+      inject:
+        - webServer
+      config:
+        requestFile: D:\DSH\logs\restart.requested
+        stopFile: D:\DSH\logs\stop.requested
+        watchdogPidFile: D:\DSH\logs\watchdog.pid
+        controllerUrl: http://127.0.0.1:3081/
