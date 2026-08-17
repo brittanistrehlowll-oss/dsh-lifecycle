@@ -121,8 +121,23 @@ while ($true) {
     $oldListener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($oldListener) { $oldPid = $oldListener.OwningProcess }
 
-    Write-WatchLog "restart.requested detected (restartId=$restartId) -> restarting DSH"
+    # —— 优雅延迟重启（V3）——
+    # marker 可携带 graceSeconds=N（秒）。当由 agent 写 marker 触发时，用延迟字段
+    # 留出宽限窗口：让当前 agent 回合先完成并回复用户，watchdog 到点后才真正重启，
+    # 避免宿主被杀连带掐断正在执行的 Pwsh 命令（结果 unknown 的中断）。
+    # 交互按钮（/api/restart）不携带该字段，默认即时重启，保持人工等待覆盖层 UX。
+    $graceSeconds = 0
+    if ($markerContent -match 'graceSeconds=(\d+)') {
+        $graceSeconds = [int]$Matches[1]
+    }
+
+    Write-WatchLog "restart.requested detected (restartId=$restartId, graceSeconds=$graceSeconds) -> restarting DSH"
     $recentRestarts += (Get-Date)
+    if ($graceSeconds -gt 0) {
+        Write-WatchLog "graceful restart: waiting ${graceSeconds}s before restarting (letting current turn finish)"
+        Start-Sleep -Seconds $graceSeconds
+        Write-WatchLog "grace window elapsed -> restarting now"
+    }
     $launcherOutput = & $launcher -ForceRestart -Port $Port 2>&1
     $newPid = 0
     $ok = $false

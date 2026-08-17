@@ -14,6 +14,7 @@ It is designed for regular users: no PIDs, no ports, no watchdog jargon in the U
 - **True restart detection** — a per-boot `bootId` is compared across the restart; a stale HTTP 200 from the old instance is never mistaken for success.
 - **Slow-start & failure states** — friendly copy at 45 s ("taking longer than usual") and a recovery card at 90 s with a retry button.
 - **Zero technical jargon** in the user-facing UI.
+- **Unified bottom-left control bar** — when the optional [dsh-quota-panel](https://github.com/brittanistrehlowll-oss/dsh-quota-panel) plugin is installed, its quota capsule (¥ balance ● usage%) is automatically moved into the same bottom-left bar as the Restart/Stop buttons, with a subtle separator — one cohesive control area instead of two corners.
 
 ## Architecture
 
@@ -44,6 +45,11 @@ Browser (DSH page / launch page)
 | `logs/restart.requested` | plugin `/api/restart` | watchdog | force-stop + start new instance |
 | `logs/stop.requested` | plugin `/api/stop` | watchdog | stop DSH, keep controller up |
 | `logs/start.requested` | controller `/api/start` | watchdog | start DSH |
+
+The restart marker supports two modes:
+
+- **Immediate** (default for the interactive button): `restartId=rst_<ts>_<hex> requested by ...` — the watchdog restarts within the next poll cycle (≤ 30 s).
+- **Graceful delay** (for agent/automation triggers): append `graceSeconds=<N>` (e.g. 30–90). The watchdog sleeps N seconds before restarting, letting the current agent turn finish and reply first, so the host kill never cuts an in-flight command. It logs `grace window elapsed -> restarting now` when the window ends.
 
 ## Installation
 
@@ -81,9 +87,11 @@ Browser (DSH page / launch page)
 
 ## Usage
 
-- **Restart**: click the small ⟳ **Restart** button in the bottom-left sidebar (above Settings). Confirm. The page enters the takeover overlay and automatically reloads into the new instance.
-- **Stop**: click the ⏻ **Stop** button, confirm. DSH stops, the browser is redirected to `http://127.0.0.1:3081/`.
+- **Lifecycle bar**: a single pill-shaped control bar sits at the bottom-left (above Settings). From left to right it shows the quota capsule (if `dsh-quota-panel` is installed), a thin separator, and the ⟳ **Restart** / ⏻ **Stop** buttons. Clicking the quota capsule expands its detail card directly above the bar.
+- **Restart**: click ⟳ **Restart**, confirm. The page enters the takeover overlay and automatically reloads into the new instance.
+- **Stop**: click ⏻ **Stop**, confirm. DSH stops, the browser is redirected to `http://127.0.0.1:3081/`.
 - **Start**: on the launch page, click **Start DSH**. It returns to your previous URL automatically (stored in `localStorage.dsh_lastUrl`).
+- **Quota**: click the capsule (¥ balance ● usage%) to expand/collapse the quota card above the bar; the card is repositioned to stay anchored to the bottom-left bar.
 
 ## Configuration
 
